@@ -1,0 +1,116 @@
+.sidebar {
+  width: var(--sidebar-width);
+  height: calc(100vh - var(--header-height));
+  background-color: var(--color-canvas-subtle);
+  border-right: 1px solid var(--color-border-default);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+  transition: transform 0.2s ease;
+}
+
+.searchContainer {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.searchInputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: var(--color-canvas-default);
+  border: 1px solid var(--color-border-default);
+  border-radius: 6px;
+  padding: 0.35rem 0.5rem;
+}
+
+.searchInputWrapper:focus-within {
+  border-color: var(--color-accent-fg);
+  box-shadow: 0 0 0 2px var(--color-accent-subtle);
+}
+
+.searchIcon {
+  color: var(--color-fg-muted);
+}
+
+.searchInput {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 0.85rem;
+  color: var(--color-fg-default);
+}
+
+.clearButton {
+  background: transparent;
+  border: none;
+  color: var(--color-fg-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 0;
+}
+
+.clearButton:hover {
+  color: var(--color-fg-default);
+}
+
+.treeContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.treeHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem 0.5rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-fg-subtle);
+}
+
+.emptyTree {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  color: var(--color-fg-muted);
+  font-size: 0.85rem;
+}
+
+.backdrop {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    bottom: 0;
+    z-index: 50;
+    transform: translateX(-100%);
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.15);
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+
+  .backdrop {
+    display: block;
+    position: fixed;
+    top: var(--header-height);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 40;
+  }
+}

@@ -1,0 +1,292 @@
+/* KaTeX Stylesheet */
+@import "katex/dist/katex.min.css";
+
+:root {
+  /* GitHub Light Theme Palette */
+  --color-canvas-default: #ffffff;
+  --color-canvas-subtle: #f6f8fa;
+  --color-canvas-inset: #f6f8fa;
+  --color-canvas-overlay: #ffffff;
+  --color-border-default: #d0d7de;
+  --color-border-muted: #d8dee4;
+  --color-border-subtle: rgba(31, 35, 40, 0.15);
+  --color-fg-default: #1f2328;
+  --color-fg-muted: #656d76;
+  --color-fg-subtle: #6e7781;
+  --color-accent-fg: #0969da;
+  --color-accent-emphasis: #0969da;
+  --color-accent-subtle: #ddf4ff;
+  --color-success-fg: #1a7f37;
+  --color-success-subtle: #dafbe1;
+  --color-attention-fg: #9a6700;
+  --color-attention-subtle: #fff8c5;
+  --color-danger-fg: #cf222e;
+  --color-danger-subtle: #ffebe9;
+  --color-neutral-muted: rgba(175, 184, 193, 0.2);
+
+  /* Obsidian UI Layout Constants */
+  --sidebar-width: 280px;
+  --header-height: 52px;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --font-content: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+[data-theme="dark"] {
+  /* GitHub Dark Theme Palette */
+  --color-canvas-default: #0d1117;
+  --color-canvas-subtle: #161b22;
+  --color-canvas-inset: #010409;
+  --color-canvas-overlay: #1c2128;
+  --color-border-default: #30363d;
+  --color-border-muted: #21262d;
+  --color-border-subtle: rgba(240, 246, 252, 0.1);
+  --color-fg-default: #e6edf3;
+  --color-fg-muted: #848d97;
+  --color-fg-subtle: #7d8590;
+  --color-accent-fg: #58a6ff;
+  --color-accent-emphasis: #1f6feb;
+  --color-accent-subtle: rgba(56, 139, 253, 0.15);
+  --color-success-fg: #3fb950;
+  --color-success-subtle: rgba(46, 160, 67, 0.15);
+  --color-attention-fg: #d29922;
+  --color-attention-subtle: rgba(187, 128, 9, 0.15);
+  --color-danger-fg: #f85149;
+  --color-danger-subtle: rgba(248, 81, 73, 0.15);
+  --color-neutral-muted: rgba(110, 118, 129, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-canvas-default: #0d1117;
+    --color-canvas-subtle: #161b22;
+    --color-canvas-inset: #010409;
+    --color-canvas-overlay: #1c2128;
+    --color-border-default: #30363d;
+    --color-border-muted: #21262d;
+    --color-border-subtle: rgba(240, 246, 252, 0.1);
+    --color-fg-default: #e6edf3;
+    --color-fg-muted: #848d97;
+    --color-fg-subtle: #7d8590;
+    --color-accent-fg: #58a6ff;
+    --color-accent-emphasis: #1f6feb;
+    --color-accent-subtle: rgba(56, 139, 253, 0.15);
+    --color-success-fg: #3fb950;
+    --color-success-subtle: rgba(46, 160, 67, 0.15);
+    --color-attention-fg: #d29922;
+    --color-attention-subtle: rgba(187, 128, 9, 0.15);
+    --color-danger-fg: #f85149;
+    --color-danger-subtle: rgba(248, 81, 73, 0.15);
+    --color-neutral-muted: rgba(110, 118, 129, 0.4);
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  background-color: var(--color-canvas-default);
+  color: var(--color-fg-default);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--color-accent-fg);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-default);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-fg-muted);
+}
+
+/* ==========================================================================
+   Obsidian Specific Markdown Elements Styling
+   ========================================================================== */
+
+/* Wikilinks */
+.obsidian-wikilink {
+  color: var(--color-accent-fg);
+  font-weight: 500;
+  text-decoration: none;
+  border-bottom: 1px dashed var(--color-accent-fg);
+  padding-bottom: 1px;
+  transition: opacity 0.15s ease, background 0.15s ease;
+  border-radius: 2px;
+}
+
+.obsidian-wikilink:hover {
+  text-decoration: none;
+  background-color: var(--color-accent-subtle);
+  border-bottom-style: solid;
+}
+
+/* Highlights */
+.obsidian-mark {
+  background-color: #ffe566;
+  color: #1f2328;
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .obsidian-mark {
+  background-color: #6e5800;
+  color: #fff;
+}
+
+/* Callouts */
+.obsidian-callout {
+  margin: 1.25rem 0;
+  padding: 0.85rem 1.15rem;
+  border-left: 4px solid var(--color-accent-fg);
+  background-color: var(--color-canvas-subtle);
+  border-radius: 0 6px 6px 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.obsidian-callout-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  cursor: default;
+  user-select: none;
+}
+
+.obsidian-callout.is-collapsible summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+.obsidian-callout.is-collapsible summary::-webkit-details-marker {
+  display: none;
+}
+
+.obsidian-callout.is-collapsible .callout-fold-indicator {
+  margin-left: auto;
+  font-size: 0.85rem;
+  transition: transform 0.2s ease;
+}
+
+.obsidian-callout.is-collapsible[open] .callout-fold-indicator {
+  transform: rotate(180deg);
+}
+
+.obsidian-callout-content {
+  font-size: 0.925rem;
+  line-height: 1.6;
+  color: var(--color-fg-default);
+}
+
+.obsidian-callout-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* Callout Type Color Variants */
+.obsidian-callout-note,
+.obsidian-callout-info,
+.obsidian-callout-todo {
+  border-left-color: #0969da;
+  background-color: rgba(9, 105, 218, 0.05);
+}
+
+.obsidian-callout-tip,
+.obsidian-callout-hint,
+.obsidian-callout-success,
+.obsidian-callout-check {
+  border-left-color: #1a7f37;
+  background-color: rgba(26, 127, 55, 0.05);
+}
+
+.obsidian-callout-warning,
+.obsidian-callout-caution,
+.obsidian-callout-question,
+.obsidian-callout-help {
+  border-left-color: #9a6700;
+  background-color: rgba(154, 103, 0, 0.06);
+}
+
+.obsidian-callout-danger,
+.obsidian-callout-error,
+.obsidian-callout-bug {
+  border-left-color: #cf222e;
+  background-color: rgba(207, 34, 46, 0.06);
+}
+
+.obsidian-callout-important,
+.obsidian-callout-example {
+  border-left-color: #8250df;
+  background-color: rgba(130, 80, 223, 0.06);
+}
+
+/* Embeds */
+.obsidian-embed-image img {
+  max-width: 100%;
+  border-radius: 6px;
+  margin: 1rem 0;
+  border: 1px solid var(--color-border-default);
+}
+
+.obsidian-embed-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border-default);
+  border-radius: 6px;
+  background: var(--color-canvas-subtle);
+  margin: 0.5rem 0;
+}
+
+/* Mermaid Chart Containers */
+.mermaid-container {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem;
+  background-color: var(--color-canvas-subtle);
+  border: 1px solid var(--color-border-default);
+  border-radius: 6px;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
+
+.mermaid-container svg {
+  max-width: 100%;
+  height: auto;
+}

@@ -1,0 +1,98 @@
+.nodeContainer {
+  user-select: none;
+  font-size: 0.85rem;
+}
+
+.itemRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--color-fg-default);
+  transition: background-color 0.12s ease, color 0.12s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemRow:hover {
+  background-color: var(--color-canvas-subtle);
+}
+
+.activeRow {
+  background-color: var(--color-accent-subtle) !important;
+  color: var(--color-accent-fg) !important;
+  font-weight: 500;
+}
+
+.chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--color-fg-muted);
+  transition: transform 0.15s ease;
+}
+
+.chevronOpen {
+  transform: rotate(90deg);
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  color: var(--color-fg-muted);
+  flex-shrink: 0;
+}
+
+.folderIcon {
+  color: #54aeff;
+}
+
+[data-theme="dark"] .folderIcon {
+  color: #58a6ff;
+}
+
+.nameText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.highlightMatch {
+  background-color: #fff8c5;
+  color: #1f2328;
+  border-radius: 2px;
+  padding: 0 2px;
+}
+
+[data-theme="dark"] .highlightMatch {
+  background-color: #bb8009;
+  color: #ffffff;
+}
+
+.childrenContainer {
+  padding-left: 1rem;
+  border-left: 1px solid var(--color-border-subtle);
+  margin-left: 0.5rem;
+}
+
+.spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--color-border-default);
+  border-top-color: var(--color-accent-fg);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
