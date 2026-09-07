@@ -213,8 +213,22 @@ function extractHeadings(markdown: string): MarkdownHeading[] {
  * Main markdown processing function that converts OFM Markdown string to safe HTML
  */
 export async function renderMarkdown(rawMarkdown: string): Promise<MarkdownRenderResult> {
-  // 1. Parse YAML Frontmatter
-  const { data: frontmatter, content: markdownBody } = matter(rawMarkdown || "");
+  const normalized = (rawMarkdown || "").replace(/\r\n/g, "\n");
+
+  // 1. Parse YAML Frontmatter safely
+  let frontmatter: FrontmatterData = {};
+  let markdownBody = normalized;
+  try {
+    const parsed = matter(normalized);
+    frontmatter = (parsed.data || {}) as FrontmatterData;
+    markdownBody = parsed.content || "";
+  } catch (err) {
+    console.warn("Frontmatter parse skipped:", err);
+    const fmMatch = normalized.match(/^---\n([\s\S]*?)\n---\n/);
+    if (fmMatch) {
+      markdownBody = normalized.slice(fmMatch[0].length);
+    }
+  }
 
   // 2. Extract Headings for TOC
   const headings = extractHeadings(markdownBody);
@@ -229,14 +243,14 @@ export async function renderMarkdown(rawMarkdown: string): Promise<MarkdownRende
     .use(remarkMath)
     .use(remarkRehype, { allowDangerousHtml: true })
     .use(rehypeRaw)
-    .use(rehypeKatex)
+    .use(rehypeKatex, { throwOnError: false, strict: false })
     .use(rehypeSlug)
     .use(rehypeStringify)
     .process(processed);
 
   return {
     html: String(file),
-    frontmatter: frontmatter as FrontmatterData,
+    frontmatter,
     headings,
     hasMermaid,
   };

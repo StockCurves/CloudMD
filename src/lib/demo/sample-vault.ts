@@ -268,6 +268,34 @@ src/
 `,
   },
   {
+    id: "demo-toc",
+    name: "TOC.md",
+    mimeType: "text/markdown",
+    isFolder: false,
+    content: `---
+title: Table of Contents
+tags:
+  - moc
+  - index
+  - toc
+---
+
+# 📑 知識庫總目錄 (Table of Contents)
+
+歡迎使用目錄總覽！點選以下子資料夾連結，將直接在左側檔案樹展開該目錄並開啟對應的筆記檔案：
+
+## 📂 子目錄連結測試
+
+- 🚀 [前往 Projects 目錄 (Google Drive 格式連結)](https://drive.google.com/drive/folders/demo-folder-projects)
+- 💡 [前往 Personal 目錄 (內部相對路徑連結)](demo-folder-personal)
+
+## 📄 單篇筆記連結
+
+- [[00 Welcome to MD Reader|歡迎頁面]]
+- [[Markdown Syntax Showcase|語法展示]]
+`,
+  },
+  {
     id: "demo-folder-projects",
     name: "Projects",
     mimeType: "application/vnd.google-apps.folder",

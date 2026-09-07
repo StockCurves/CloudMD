@@ -173,6 +173,26 @@
   vertical-align: middle;
 }
 
+.markdownBody ul:has(input[type="checkbox"]) {
+  list-style: none;
+  padding-left: 0.5rem;
+}
+
+.markdownBody a {
+  color: var(--color-accent-fg);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.markdownBody a:hover {
+  text-decoration: underline;
+  opacity: 0.85;
+}
+
+.markdownBody a.obsidian-wikilink {
+  text-decoration: none;
+}
+
 /* TOC Sidebar */
 .tocSidebar {
   width: 220px;

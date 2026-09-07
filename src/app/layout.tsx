@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MD Reader — Online Obsidian Markdown Reader",
+  title: "CloudMD — Online Obsidian Markdown Reader",
   description: "Read your Obsidian notes and Markdown files from Google Drive with full OFM syntax support, Wikilinks, Callouts, KaTeX, and Mermaid.",
 };
 

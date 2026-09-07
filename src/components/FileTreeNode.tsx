@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import styles from "./FileTreeNode.module.css";
 import { DriveItem } from "@/lib/drive/types";
 import { useReader } from "@/lib/context/ReaderContext";
@@ -13,13 +13,10 @@ interface FileTreeNodeProps {
 }
 
 export const FileTreeNode: React.FC<FileTreeNodeProps> = ({ item, searchFilter }) => {
-  const { currentFile, selectFile, toggleFolder } = useReader();
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const { currentFile, selectFile, toggleFolder, expandedFolderIds } = useReader();
+  const isOpen = item.isFolder && expandedFolderIds.has(item.id);
 
   const isSelected = currentFile?.id === item.id;
-  const isMatch =
-    searchFilter &&
-    item.name.toLowerCase().includes(searchFilter.toLowerCase().trim());
 
   // Function to render highlighted matched text
   const renderHighlightedName = (name: string, filter: string) => {
@@ -38,11 +35,7 @@ export const FileTreeNode: React.FC<FileTreeNodeProps> = ({ item, searchFilter }
 
   const handleClick = async () => {
     if (item.isFolder) {
-      const nextOpen = !isOpen;
-      setIsOpen(nextOpen);
-      if (nextOpen && !item.hasChildrenLoaded) {
-        await toggleFolder(item);
-      }
+      await toggleFolder(item);
     } else {
       await selectFile(item);
     }
@@ -90,3 +83,4 @@ export const FileTreeNode: React.FC<FileTreeNodeProps> = ({ item, searchFilter }
     </div>
   );
 };
+

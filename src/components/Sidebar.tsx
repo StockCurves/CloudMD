@@ -4,7 +4,7 @@ import React from "react";
 import styles from "./Sidebar.module.css";
 import { useReader } from "@/lib/context/ReaderContext";
 import { FileTreeNode } from "./FileTreeNode";
-import { Search, X, Files } from "lucide-react";
+import { Search, X, Files, AlertCircle, RefreshCw, Sparkles, Folder } from "lucide-react";
 import clsx from "clsx";
 
 export const Sidebar: React.FC = () => {
@@ -15,6 +15,12 @@ export const Sidebar: React.FC = () => {
     isSidebarOpen,
     setIsSidebarOpen,
     isLoadingTree,
+    treeError,
+    refreshFileTree,
+    setVaultMode,
+    vaultMode,
+    currentVault,
+    setIsVaultModalOpen,
   } = useReader();
 
   return (
@@ -56,9 +62,51 @@ export const Sidebar: React.FC = () => {
             <Files size={13} />
           </div>
 
-          {isLoadingTree && fileTree.length === 0 ? (
+          {treeError ? (
+            <div className={styles.errorContainer}>
+              <div className={styles.errorTitle}>
+                <AlertCircle size={15} />
+                <span>載入 Google Drive 失敗</span>
+              </div>
+              <p className={styles.errorMessage}>{treeError}</p>
+              <div className={styles.errorActions}>
+                <button
+                  className={clsx(styles.errorButton, styles.primaryErrorButton)}
+                  onClick={() => refreshFileTree()}
+                >
+                  <RefreshCw size={12} style={{ display: "inline", marginRight: "4px" }} />
+                  重試連線
+                </button>
+                <button
+                  className={styles.errorButton}
+                  onClick={() => {
+                    setVaultMode("demo");
+                    refreshFileTree();
+                  }}
+                >
+                  <Sparkles size={12} style={{ display: "inline", marginRight: "4px" }} />
+                  切換回 Demo 範例庫
+                </button>
+              </div>
+            </div>
+          ) : isLoadingTree && fileTree.length === 0 ? (
             <div className={styles.emptyTree}>
               <p>載入中...</p>
+            </div>
+          ) : vaultMode === "google" && !currentVault ? (
+            <div className={styles.emptyTree} style={{ padding: "2rem 1rem", textAlign: "center" }}>
+              <Folder size={28} style={{ color: "var(--color-accent-fg)", margin: "0 auto 0.75rem auto", display: "block" }} />
+              <p style={{ fontWeight: 600, color: "var(--color-fg-default)", marginBottom: "0.25rem" }}>尚未選取筆記庫</p>
+              <p style={{ fontSize: "0.75rem", color: "var(--color-fg-muted)", marginBottom: "1rem" }}>
+                請指定一個 Google Drive 目錄作為 Vault
+              </p>
+              <button
+                className={clsx(styles.errorButton, styles.primaryErrorButton)}
+                style={{ width: "100%", justifyContent: "center" }}
+                onClick={() => setIsVaultModalOpen(true)}
+              >
+                選取 Drive 資料夾
+              </button>
             </div>
           ) : fileTree.length === 0 ? (
             <div className={styles.emptyTree}>

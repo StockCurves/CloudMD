@@ -18,8 +18,7 @@ export const VaultSelectorModal: React.FC<VaultSelectorModalProps> = ({
   onClose,
   isLoggedIn,
 }) => {
-  const { vaultMode, setVaultMode, currentVault, setCurrentVault, refreshFileTree } =
-    useReader();
+  const { vaultMode, setVaultMode, currentVault, setCurrentVault } = useReader();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [folders, setFolders] = useState<DriveFolderSearchItem[]>([]);
@@ -29,23 +28,42 @@ export const VaultSelectorModal: React.FC<VaultSelectorModalProps> = ({
   useEffect(() => {
     if (!isOpen || !isLoggedIn) return;
 
+    const controller = new AbortController();
+    let isMounted = true;
     const fetchFolders = async () => {
       setIsLoadingFolders(true);
       try {
-        const res = await fetch(`/api/drive/folders?mode=search&q=${encodeURIComponent(searchQuery)}`);
-        if (res.ok) {
+        const res = await fetch(
+          `/api/drive/folders?mode=search&q=${encodeURIComponent(searchQuery)}`,
+          { signal: controller.signal }
+        );
+        if (res.ok && isMounted) {
           const data = await res.json();
           setFolders(data.folders || []);
         }
       } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") return;
         console.error("Error searching drive folders:", err);
       } finally {
-        setIsLoadingFolders(false);
+        if (isMounted) setIsLoadingFolders(false);
       }
     };
 
+    // If initial open without query, fetch immediately; otherwise debounce
+    if (!searchQuery) {
+      fetchFolders();
+      return () => {
+        isMounted = false;
+        controller.abort();
+      };
+    }
+
     const debounce = setTimeout(fetchFolders, 300);
-    return () => clearTimeout(debounce);
+    return () => {
+      isMounted = false;
+      clearTimeout(debounce);
+      controller.abort();
+    };
   }, [isOpen, isLoggedIn, searchQuery]);
 
   if (!isOpen) return null;
@@ -59,7 +77,6 @@ export const VaultSelectorModal: React.FC<VaultSelectorModalProps> = ({
       rootFolderId: "demo",
       rootFolderName: "Demo Vault",
     });
-    refreshFileTree();
     onClose();
   };
 
@@ -72,7 +89,6 @@ export const VaultSelectorModal: React.FC<VaultSelectorModalProps> = ({
       rootFolderId: folder.id,
       rootFolderName: folder.name,
     });
-    refreshFileTree();
     onClose();
   };
 

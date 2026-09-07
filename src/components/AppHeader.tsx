@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import styles from "./AppHeader.module.css";
 import { useReader } from "@/lib/context/ReaderContext";
 import { signIn, signOut } from "next-auth/react";
@@ -36,8 +36,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ user, onOpenVaultModal }) 
     isLoadingTree,
   } = useReader();
 
-  const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
-
   const cycleTheme = () => {
     if (theme === "system") setTheme("light");
     else if (theme === "light") setTheme("dark");
@@ -57,7 +55,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ user, onOpenVaultModal }) 
 
         <div className={styles.logoArea}>
           <span className={styles.logoIcon}>📑</span>
-          <span>MD Reader</span>
+          <span>CloudMD</span>
         </div>
 
         <button
@@ -66,7 +64,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ user, onOpenVaultModal }) 
           title="切換筆記庫 (Vault)"
         >
           <FolderKanban size={14} />
-          <span>
+          <span suppressHydrationWarning>
             {vaultMode === "demo"
               ? "Demo Vault"
               : currentVault?.name || "Google Drive Vault"}
@@ -89,6 +87,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({ user, onOpenVaultModal }) 
           className={styles.iconButton}
           onClick={cycleTheme}
           title={`主題：${theme === "system" ? "跟隨系統" : theme === "dark" ? "深色" : "淺色"}`}
+          suppressHydrationWarning
         >
           {theme === "system" ? (
             <Monitor size={15} />

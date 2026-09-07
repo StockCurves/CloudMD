@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { listFolderItems, searchDriveFolders } from "@/lib/drive/google";
+import { listFolderItems, searchDriveFolders, getDriveItemInfo } from "@/lib/drive/google";
 
 export async function GET(request: NextRequest) {
   try {
@@ -24,8 +24,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ folders });
     }
 
-    const items = await listFolderItems(accessToken, folderId);
-    return NextResponse.json({ items, folderId });
+    const [items, folderInfo] = await Promise.all([
+      listFolderItems(accessToken, folderId),
+      folderId !== "root"
+        ? getDriveItemInfo(accessToken, folderId).catch((err) => {
+            console.warn(`Could not get folder info for ${folderId}:`, err);
+            return null;
+          })
+        : Promise.resolve(null),
+    ]);
+
+    return NextResponse.json({ items, folderId, folderInfo });
   } catch (error: unknown) {
     const errMessage = error instanceof Error ? error.message : "Unknown error occurred";
     console.error("API /api/drive/folders error:", error);

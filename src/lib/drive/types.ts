@@ -17,6 +17,14 @@ export interface DriveFolderSearchItem {
   parents?: string[];
 }
 
+export interface DriveFolderInfo {
+  id: string;
+  name: string;
+  mimeType: string;
+  isFolder: boolean;
+  parents?: string[];
+}
+
 export interface VaultConfig {
   id: string;
   name: string;

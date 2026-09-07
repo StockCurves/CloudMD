@@ -3,7 +3,8 @@
 import React, { useEffect, useRef, useState, useTransition } from "react";
 import styles from "./MarkdownViewer.module.css";
 import { useReader } from "@/lib/context/ReaderContext";
-import { ChevronRight, FileText, Tag, Calendar, User, ChevronDown, ChevronUp } from "lucide-react";
+import { parseDriveLink } from "@/lib/drive/url";
+import { ChevronRight, Tag, Calendar, User, ChevronDown, ChevronUp } from "lucide-react";
 import mermaid from "mermaid";
 
 export const MarkdownViewer: React.FC = () => {
@@ -14,15 +15,26 @@ export const MarkdownViewer: React.FC = () => {
     headings,
     isLoadingContent,
     navigateToWikilink,
+    navigateToLinkTarget,
     currentVault,
     vaultMode,
     theme,
+    setIsVaultModalOpen,
   } = useReader();
 
   const articleRef = useRef<HTMLDivElement>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isFrontmatterOpen, setIsFrontmatterOpen] = useState<boolean>(true);
   const [, startTransition] = useTransition();
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      startTransition(() => {
+        setToastMessage(null);
+      });
+    }, 3000);
+  };
 
   // Initialize Mermaid with appropriate theme
   useEffect(() => {
@@ -57,45 +69,48 @@ export const MarkdownViewer: React.FC = () => {
     return () => clearTimeout(timer);
   }, [renderedHtml]);
 
-  // Intercept Obsidian Wikilink clicks
-  useEffect(() => {
-    const container = articleRef.current;
-    if (!container) return;
+  // Intercept Markdown and Obsidian Wikilink clicks reliably via React event delegation
+  const handleLinkClick = async (e: React.MouseEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    const anchor = target.closest("a") as HTMLAnchorElement | null;
+    if (!anchor) return;
 
-    const handleLinkClick = async (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const wikilink = target.closest("a.obsidian-wikilink") as HTMLAnchorElement | null;
+    // 1. Obsidian Wikilink
+    if (anchor.classList.contains("obsidian-wikilink")) {
+      e.preventDefault();
+      const rawTarget = anchor.getAttribute("data-wikilink-target");
+      const rawHeading = anchor.getAttribute("data-wikilink-heading");
 
-      if (wikilink) {
-        e.preventDefault();
-        const rawTarget = wikilink.getAttribute("data-wikilink-target");
-        const rawHeading = wikilink.getAttribute("data-wikilink-heading");
+      const targetName = decodeURIComponent(rawTarget || "");
+      const heading = decodeURIComponent(rawHeading || "");
 
-        const targetName = decodeURIComponent(rawTarget || "");
-        const heading = decodeURIComponent(rawHeading || "");
-
-        if (targetName) {
-          const success = await navigateToWikilink(targetName, heading);
-          if (!success) {
-            showToast(`筆記「${targetName}」尚未在此 Vault 中建立`);
-          }
+      if (targetName) {
+        const success = await navigateToWikilink(targetName, heading);
+        if (!success) {
+          showToast(`筆記「${targetName}」尚未在此 Vault 中建立`);
         }
       }
-    };
+      return;
+    }
 
-    container.addEventListener("click", handleLinkClick);
-    return () => {
-      container.removeEventListener("click", handleLinkClick);
-    };
-  }, [navigateToWikilink]);
+    // 2. Standard Links (Google Drive folder/file, relative markdown path, or anchors)
+    const href = anchor.getAttribute("href");
+    if (!href) return;
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      startTransition(() => {
-        setToastMessage(null);
-      });
-    }, 3000);
+    const parsed = parseDriveLink(href);
+    if (parsed.type !== "external") {
+      // Prevent default navigation immediately before any async await
+      e.preventDefault();
+      const linkText = anchor.textContent?.trim();
+      const res = await navigateToLinkTarget(href, linkText);
+      if (res.message) {
+        showToast(res.message);
+      }
+    } else {
+      // External link: ensure target="_blank" and rel="noopener noreferrer"
+      anchor.setAttribute("target", "_blank");
+      anchor.setAttribute("rel", "noopener noreferrer");
+    }
   };
 
   const tagsList = Array.isArray(frontmatter.tags)
@@ -108,7 +123,7 @@ export const MarkdownViewer: React.FC = () => {
     <main className={styles.viewerContainer}>
       {/* Breadcrumb Bar */}
       <div className={styles.breadcrumbBar}>
-        <span>
+        <span suppressHydrationWarning>
           {vaultMode === "demo" ? "Demo Vault" : currentVault?.name || "Vault"}
         </span>
         <ChevronRight size={13} />
@@ -124,13 +139,39 @@ export const MarkdownViewer: React.FC = () => {
           <p style={{ marginTop: "1rem" }}>載入筆記內容中...</p>
         </div>
       ) : !currentFile ? (
-        <div className={styles.emptyState}>
-          <div className={styles.emptyIcon}>📖</div>
-          <h3>尚未選取筆記</h3>
-          <p style={{ marginTop: "0.5rem" }}>
-            請由左側檔案樹點選任一 Markdown 筆記開始閱讀。
-          </p>
-        </div>
+        vaultMode === "google" && !currentVault ? (
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>📁</div>
+            <h3>請先選取 Google Drive 筆記庫目錄</h3>
+            <p style={{ marginTop: "0.5rem", maxWidth: "420px", lineHeight: "1.6" }}>
+              為了避免將整個雲端硬碟全部讀入，請先指定您存放 Markdown 筆記的目錄作為 Vault。
+            </p>
+            <button
+              style={{
+                marginTop: "1.25rem",
+                padding: "0.5rem 1.25rem",
+                backgroundColor: "var(--color-accent-emphasis)",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "6px",
+                fontWeight: 500,
+                fontSize: "0.9rem",
+                cursor: "pointer",
+              }}
+              onClick={() => setIsVaultModalOpen(true)}
+            >
+              選取 Vault 目錄
+            </button>
+          </div>
+        ) : (
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>📖</div>
+            <h3>尚未選取筆記</h3>
+            <p style={{ marginTop: "0.5rem" }}>
+              請由左側檔案樹點選任一 Markdown 筆記開始閱讀。
+            </p>
+          </div>
+        )
       ) : (
         <div className={styles.contentWrapper}>
           <article className={styles.article}>
@@ -192,6 +233,7 @@ export const MarkdownViewer: React.FC = () => {
               ref={articleRef}
               className={styles.markdownBody}
               dangerouslySetInnerHTML={{ __html: renderedHtml }}
+              onClick={handleLinkClick}
             />
           </article>
 

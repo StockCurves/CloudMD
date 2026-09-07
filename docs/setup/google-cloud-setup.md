@@ -1,6 +1,6 @@
 # Google Cloud Platform (GCP) OAuth 設定教學
 
-本文件說明如何建立 Google Cloud 專案與 OAuth 2.0 Client ID，以供 MD Reader 進行 Google 登入與存取 Google Drive 中的 Markdown 檔案。
+本文件說明如何建立 Google Cloud 專案與 OAuth 2.0 Client ID，以供 CloudMD 進行 Google 登入與存取 Google Drive 中的 Markdown 檔案。
 
 ---
 
@@ -8,7 +8,7 @@
 
 1. 前往 [Google Cloud Console](https://console.cloud.google.com/)。
 2. 點擊頂部專案選單，選擇 **「新增專案」 (New Project)**。
-3. 專案名稱可填寫 `md-reader`，點擊 **「建立」**。
+3. 專案名稱可填寫 `CloudMD`，點擊 **「建立」**。
 
 ---
 
@@ -25,7 +25,7 @@
 1. 前往 **「API 和服務」 > 「OAuth 同意畫面」**。
 2. 使用者類型 (User Type) 選擇 **「外部」 (External)**，點擊「建立」。
 3. 填寫必要欄位：
-   - **應用程式名稱**：`MD Reader`
+   - **應用程式名稱**：`CloudMD`
    - **使用者支援電子郵件**：填寫你的 Gmail
    - **開發人員聯絡資訊**：填寫你的 Gmail
 4. 點擊「儲存並繼續」。
@@ -46,7 +46,7 @@
 1. 前往 **「API 和服務」 > 「憑證」 (Credentials)**。
 2. 點擊頂部 **「+ 建立憑證」 > 「OAuth 用戶端 ID」 (OAuth client ID)**。
 3. 應用程式類型選擇 **「網路應用程式」 (Web application)**。
-4. 名稱填寫 `MD Reader Web Client`。
+4. 名稱填寫 `CloudMD Web Client`。
 5. **已授權的 JavaScript 來源 (Authorized JavaScript origins)**：
    - 本地開發：`http://localhost:3000`
    - 正式環境 (若已佈署到 Vercel)：`https://your-app.vercel.app`

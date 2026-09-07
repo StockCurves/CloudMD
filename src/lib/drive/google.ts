@@ -9,8 +9,11 @@ export async function listFolderItems(
   accessToken: string,
   folderId: string = "root"
 ): Promise<DriveItem[]> {
+  // Sanitize folderId: if "demo" or invalid string, default to "root"
+  const safeFolderId = (!folderId || folderId === "demo" || folderId.trim() === "") ? "root" : folderId;
+
   // Query: in parent folder, not trashed, and is either a folder or a markdown / text file
-  const query = `'${folderId}' in parents and trashed = false and (mimeType = 'application/vnd.google-apps.folder' or name contains '.md' or mimeType = 'text/markdown' or mimeType = 'text/plain')`;
+  const query = `'${safeFolderId}' in parents and trashed = false and (mimeType = 'application/vnd.google-apps.folder' or name contains '.md' or mimeType = 'text/markdown' or mimeType = 'text/plain')`;
 
   const params = new URLSearchParams({
     q: query,
@@ -28,7 +31,14 @@ export async function listFolderItems(
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Google Drive API error (${response.status}): ${errorText}`);
+    let errorDetail = errorText;
+    try {
+      const errJson = JSON.parse(errorText);
+      errorDetail = errJson.error?.message || errorText;
+    } catch {
+      // raw text
+    }
+    throw new Error(`Google Drive API (${response.status}): ${errorDetail}`);
   }
 
   const data = await response.json();
@@ -79,7 +89,7 @@ export async function searchDriveFolders(
     q: query,
     fields: "files(id, name, modifiedTime, parents)",
     orderBy: "modifiedTime desc,name",
-    pageSize: "25",
+    pageSize: "50",
   });
 
   const response = await fetch(`${GOOGLE_DRIVE_API_BASE}/files?${params.toString()}`, {
@@ -91,11 +101,51 @@ export async function searchDriveFolders(
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Google Drive folder search failed: ${errorText}`);
+    let errorDetail = errorText;
+    try {
+      const errJson = JSON.parse(errorText);
+      errorDetail = errJson.error?.message || errorText;
+    } catch {
+      // raw text
+    }
+    throw new Error(`Google Drive folder search failed: ${errorDetail}`);
   }
 
   const data = await response.json();
   return data.files || [];
+}
+
+/**
+ * Fetch metadata of a specific Google Drive item (file or folder)
+ */
+export async function getDriveItemInfo(
+  accessToken: string,
+  itemId: string
+): Promise<{ id: string; name: string; mimeType: string; isFolder: boolean; parents?: string[] }> {
+  const safeId = itemId === "root" ? "root" : itemId;
+  const res = await fetch(
+    `${GOOGLE_DRIVE_API_BASE}/files/${safeId}?fields=id,name,mimeType,parents`,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: "application/json",
+      },
+    }
+  );
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Google Drive API (${res.status}): ${errorText}`);
+  }
+
+  const data = await res.json();
+  return {
+    id: data.id,
+    name: data.name || "Untitled",
+    mimeType: data.mimeType || "",
+    isFolder: data.mimeType === "application/vnd.google-apps.folder",
+    parents: data.parents,
+  };
 }
 
 /**
@@ -105,9 +155,9 @@ export async function getDriveFileContent(
   accessToken: string,
   fileId: string
 ): Promise<{ content: string; name: string; modifiedTime?: string }> {
-  // First get metadata (name)
+  // First get metadata (name, mimeType)
   const metaRes = await fetch(
-    `${GOOGLE_DRIVE_API_BASE}/files/${fileId}?fields=id,name,modifiedTime`,
+    `${GOOGLE_DRIVE_API_BASE}/files/${fileId}?fields=id,name,mimeType,modifiedTime`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -117,15 +167,22 @@ export async function getDriveFileContent(
   );
 
   let fileName = "Untitled.md";
+  let mimeType = "";
   let modifiedTime: string | undefined;
   if (metaRes.ok) {
     const meta = await metaRes.json();
     fileName = meta.name || fileName;
+    mimeType = meta.mimeType || "";
     modifiedTime = meta.modifiedTime;
   }
 
-  // Get raw content
-  const contentRes = await fetch(`${GOOGLE_DRIVE_API_BASE}/files/${fileId}?alt=media`, {
+  let contentUrl = `${GOOGLE_DRIVE_API_BASE}/files/${fileId}?alt=media`;
+  if (mimeType === "application/vnd.google-apps.document") {
+    contentUrl = `${GOOGLE_DRIVE_API_BASE}/files/${fileId}/export?mimeType=text/plain`;
+  }
+
+  // Get content
+  const contentRes = await fetch(contentUrl, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
@@ -133,7 +190,14 @@ export async function getDriveFileContent(
 
   if (!contentRes.ok) {
     const err = await contentRes.text();
-    throw new Error(`Failed to fetch file content (${contentRes.status}): ${err}`);
+    let errorDetail = err;
+    try {
+      const errJson = JSON.parse(err);
+      errorDetail = errJson.error?.message || err;
+    } catch {
+      // raw text
+    }
+    throw new Error(`Failed to fetch file content (${contentRes.status}): ${errorDetail}`);
   }
 
   const content = await contentRes.text();
